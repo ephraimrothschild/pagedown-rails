@@ -34,7 +34,8 @@
 
         image: "Image <img> Ctrl+G",
         imagedescription: "enter image description here",
-        imagedialog: "<p><b>Insert Image</b></p><p>http://example.com/images/diagram.jpg \"optional title\"<br><br>Need <a href='http://www.google.com/search?q=free+image+hosting' target='_blank'>free image hosting?</a></p>",
+        imagedialog: "<p><b>Insert Image</b></p>",
+        //"<p>http://example.com/images/diagram.jpg \"optional title\"<br><br>Need <a href='http://www.google.com/search?q=free+image+hosting' target='_blank'>free image hosting?</a></p>",
 
         olist: "Numbered List <ol> Ctrl+O",
         ulist: "Bulleted List <ul> Ctrl+U",
@@ -106,9 +107,9 @@
         hooks.addNoop("onPreviewRefresh");       // called with no arguments after the preview has been refreshed
         hooks.addNoop("postBlockquoteCreation"); // called with the user's selection *after* the blockquote was created; should return the actual to-be-inserted text
         hooks.addFalse("insertImageDialog");     /* called with one parameter: a callback to be called with the URL of the image. If the application creates
-                                                  * its own image insertion dialog, this hook should return true, and the callback should be called with the chosen
-                                                  * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
-                                                  */
+         * its own image insertion dialog, this hook should return true, and the callback should be called with the chosen
+         * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
+         */
 
         this.getConverter = function () { return markdownConverter; }
 
@@ -847,13 +848,13 @@
                 result = window.pageYOffset;
             }
             else
-                if (doc.documentElement && doc.documentElement.scrollTop) {
-                    result = doc.documentElement.scrollTop;
-                }
-                else
-                    if (doc.body) {
-                        result = doc.body.scrollTop;
-                    }
+            if (doc.documentElement && doc.documentElement.scrollTop) {
+                result = doc.documentElement.scrollTop;
+            }
+            else
+            if (doc.body) {
+                result = doc.body.scrollTop;
+            }
 
             return result;
         };
@@ -1156,10 +1157,22 @@
             style.display = "inline";
             style.width = "7em";
 
+            // The file input
+            var fileInput = doc.createElement("input");
+            fileInput.type = "file";
+            fileInput.onchange = function () { uploadImageForPost(fileInput.files[0]); };
+            fileInput.setAttribute('accept', 'image/*');
+            fileInput.setAttribute('id', 'upload-image-input');
+            fileInput.setAttribute('class', 'collapsed');
+            fileInput.style.display = "block";
+            fileInput.style.width = "80%";
+            fileInput.style.marginLeft = fileInput.style.marginRight = "auto";
+            form.appendChild(fileInput)
+
             // The upload button
             var uploadButton = doc.createElement("input");
             uploadButton.type = "button";
-            uploadButton.onclick = function () { return close(false); };
+            uploadButton.onclick = function () { document.querySelector('#upload-image-input').click(); };
             uploadButton.value = "Upload";
             style = uploadButton.style;
             style.margin = "10px";
@@ -1179,6 +1192,37 @@
             form.appendChild(okButton);
             form.appendChild(uploadButton);
             form.appendChild(cancelButton);
+
+            uploadImageForPost = function (file) {
+                if (!file || !file.type.match(/image.*/)) return;
+                var fd = new FormData();
+                fd.append("image", file);
+                var xhr = new XMLHttpRequest();
+                //xhr.open('POST', 'https://api.imgur.com/3/image.json');
+                xhr.open('POST', 'https://api.imgur.com/3/upload.json');
+                xhr.onload = function () {
+                    var response = JSON.parse(xhr.responseText);
+                    //input.value = JSON.parse(xhr.responseText).data;
+                    if (response && response.data && response.data.link) {
+                        response = response.data.link.replace('http://', 'https://');
+                        var img = new Image();
+                        img.src = response;
+                        // check size
+                        img.onload = function () {
+                            if (file.size / 1024 < 500) {
+                                //var ta = document.getElementById('pagedown-image');
+                                input.value = response;
+                            } else {
+                                toastr.error("Thumbnail be less than 500KB", "Error");
+                            }
+                        };
+                    } else {
+                        toastr.error("Uploaded");
+                    }
+                };
+                xhr.setRequestHeader('Authorization', 'Client-ID a56f1697951b46e');
+                xhr.send(fd);
+            };
 
             util.addEvent(doc.body, "keydown", checkEscape);
             dialog.style.top = "50%";
@@ -1862,15 +1906,15 @@
         // text *directly before* the selection already was a blockquote:
 
         /*
-        if (chunk.before) {
-        chunk.before = chunk.before.replace(/\n?$/, "\n");
-        }
-        chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
-        function (totalMatch) {
-        chunk.startTag = totalMatch;
-        return "";
-        });
-        */
+         if (chunk.before) {
+         chunk.before = chunk.before.replace(/\n?$/, "\n");
+         }
+         chunk.before = chunk.before.replace(/(((\n|^)(\n[ \t]*)*>(.+\n)*.*)+(\n[ \t]*)*$)/,
+         function (totalMatch) {
+         chunk.startTag = totalMatch;
+         return "";
+         });
+         */
 
         // This comes down to:
         // Go backwards as many lines a possible, such that each line
@@ -1977,10 +2021,10 @@
 
         if (!/\n/.test(chunk.selection)) {
             chunk.selection = chunk.selection.replace(/^(> *)/,
-            function (wholeMatch, blanks) {
-                chunk.startTag += blanks;
-                return "";
-            });
+                function (wholeMatch, blanks) {
+                    chunk.startTag += blanks;
+                    return "";
+                });
         }
     };
 
