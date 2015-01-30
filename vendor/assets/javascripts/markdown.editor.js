@@ -1177,6 +1177,7 @@
             style.width = "7em";
 
             form.appendChild(okButton);
+            form.appendChild(uploadButton);
             form.appendChild(cancelButton);
 
             util.addEvent(doc.body, "keydown", checkEscape);
