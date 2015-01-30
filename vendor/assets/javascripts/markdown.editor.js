@@ -1158,6 +1158,15 @@
             style.display = "inline";
             style.width = "7em";
 
+            // The upload button
+            var uploadButton = doc.createElement("input");
+            uploadButton.type = "button";
+            uploadButton.onclick = function () { return close(false); };
+            uploadButton.value = "Upload";
+            style = uploadButton.style;
+            style.margin = "10px";
+            style.display = "inline";
+            style.width = "5em";
 
             // The cancel button
             var cancelButton = doc.createElement("input");
