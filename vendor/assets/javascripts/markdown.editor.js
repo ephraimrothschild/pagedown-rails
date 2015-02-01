@@ -34,8 +34,8 @@
 
         image: "Image <img> Ctrl+G",
         imagedescription: "enter image description here",
-        imagedialog: "<p><b>Insert Image</b></p>",
-        //"<p>http://example.com/images/diagram.jpg \"optional title\"<br><br>Need <a href='http://www.google.com/search?q=free+image+hosting' target='_blank'>free image hosting?</a></p>",
+        imagedialog: "<p><b>Insert Image</b></p><p><small>Enter an image url from the web, or upload an image from your computer</small></p>",
+          //<p>http://example.com/images/diagram.jpg \"optional title\"<br><br>Need <a href='http://www.google.com/search?q=free+image+hosting' target='_blank'>free image hosting?</a></p>",
 
         olist: "Numbered List <ol> Ctrl+O",
         ulist: "Bulleted List <ul> Ctrl+U",
@@ -1167,7 +1167,7 @@
             fileInput.style.display = "block";
             fileInput.style.width = "80%";
             fileInput.style.marginLeft = fileInput.style.marginRight = "auto";
-            form.appendChild(fileInput)
+           form.appendChild(fileInput)
 
             // The upload button
             var uploadButton = doc.createElement("input");
@@ -1178,6 +1178,8 @@
             style.margin = "10px";
             style.display = "inline";
             style.width = "5em";
+            //form.appendChild(uploadButton);
+
 
             // The cancel button
             var cancelButton = doc.createElement("input");
@@ -1190,7 +1192,6 @@
             style.width = "7em";
 
             form.appendChild(okButton);
-            form.appendChild(uploadButton);
             form.appendChild(cancelButton);
 
             uploadImageForPost = function (file) {
